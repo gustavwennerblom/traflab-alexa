@@ -25,10 +25,10 @@
 				</tr>
 			</thead>
 			<tbody>
-			{% for dest, time in results.iteritems() %}
+			{% for departure in results%}
 				<tr>
-					<td>{{dest}}</td>
-                    			<td>{{time}}</td>
+					<td>{{departure.destination}}</td>
+                    			<td>{{departure.display_time}}</td>
                 		</tr>
 		    	{% endfor %}
 			</tbody>
