@@ -2,6 +2,7 @@ from credentials import trafiklab_key
 import requests
 from collections import namedtuple
 
+
 class Trafiklab(object):
     SITE_ID_SICKLAKAJ="1550"
     BASE_URL = "http://api.sl.se/api2/realtimedeparturesV4.{schema}?key={key}&siteid={siteid}&timewindow={timewindow}"
@@ -42,6 +43,7 @@ class Trafiklab(object):
                                              key=self.API_KEY,
                                              siteid=self.home_station,
                                              timewindow=timewindow)
+
 
 if __name__ == '__main__':
     trafiklab = Trafiklab()

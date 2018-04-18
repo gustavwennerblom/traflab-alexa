@@ -1,0 +1,7 @@
+welcome: Hi. Let me know your desired direction and mode of transport.
+
+departure_info: Next {{mode}} leaves in {{display_time}} with destination {{destination}}.
+
+list_origins: Currently I know the departures for {{origins}}
+
+not_yet_implemented: Sorry, this is not yet implemented.

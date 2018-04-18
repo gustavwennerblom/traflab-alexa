@@ -1,0 +1,8 @@
+    OneShotDepartureIntent when is the next {mode} {direction}
+
+DialogDepartureIntent when is the next {mode}
+DialogDepartureIntent when does the next {mode} leave
+
+SupportedOriginsIntent what origins are supported
+SupportedOriginsIntent what origins
+SupportedOriginsIntent what stations

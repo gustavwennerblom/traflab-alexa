@@ -1,0 +1,50 @@
+{
+  "intents": [
+    {
+      "intent": "OneshotDepartureIntent",
+      "slots": [
+        {
+          "name": "Origin",
+          "type": "LIST_OF_ORIGINS"
+        },
+        {
+          "name": "Direction",
+          "type": "LIST_OF_DIRECTIONS"
+        },
+        {
+          "name": "Mode",
+          "type": "LIST_OF_MODES"
+        }
+      ]
+    },
+    {
+      "intent": "DialogDepartureIntent",
+      "slots": [
+        {
+          "name": "Origin",
+          "type": "LIST_OF_ORIGINS"
+        },
+        {
+          "name": "Direction",
+          "type": "LIST_OF_DIRECTIONS"
+        },
+        {
+          "name": "Mode",
+          "type": "LIST_OF_MODES"
+        }
+      ]
+    },
+    {
+      "intent": "SupportedOriginsIntent"
+    },
+    {
+      "intent": "AMAZON.HelpIntent"
+    },
+    {
+      "intent": "AMAZON.StopIntent"
+    },
+    {
+      "intent": "AMAZON.CancelIntent"
+    }
+  ]
+}
