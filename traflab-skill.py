@@ -1,8 +1,6 @@
 from flask_ask import Ask, question, statement
 from flask import Flask, render_template
 from traflab2 import Trafiklab
-import logging
-import sys
 from glogger.gLogger import GLogger
 
 log = GLogger(name='traflab-alexa-main').get_logger()
@@ -10,7 +8,7 @@ log = GLogger(name='traflab-alexa-main').get_logger()
 app = Flask(__name__)
 ask = Ask(app, '/')
 
-SITE_IDS = {'sickla kaj': '1550'}
+SITE_IDS = {'sickla kaj': '1550'}       # TODO: Move out to separate file
 
 log.info("Log enabled")
 
@@ -21,8 +19,8 @@ def launch_skill():
     return question(render_template('welcome'))
 
 
+# TODO: Find a more graceful way of handling default. Possibly a combo of https://www.trafiklab.se/api/sl-platsuppslag/dokumentation and https://developer.amazon.com/docs/custom-skills/device-address-api.html#getAddress
 @ask.intent('OneShotDepartureIntent',
-            mapping={'origin': 'Origin', 'direction': 'Direction', 'mode': 'Mode'},
             default={'origin': 'sickla kaj'})
 def one_shot_departure(origin, direction, mode):
     log.info("OneShotDepartureIntent got origin={}, direction={}, mode={}".format(origin, direction, mode))
@@ -33,7 +31,7 @@ def one_shot_departure(origin, direction, mode):
 
 @ask.intent('DialogDepartureIntent')
 def dialog_departure():
-    return render_template('not_yet_implemented')
+    return render_template('not_yet_implemented')   # TODO: Implement dialogue intent resolver
 
 
 @ask.intent('SupportedOriginsIntent')
@@ -43,8 +41,10 @@ def supported_origins():
     list_origins_utterance = render_template('list_origins', origins=origins)
     return question(list_origins_utterance)
 
+# TODO: Fix a function for setting a default origin
 
-def _make_trafiklab_request(origin, mode, direction):
+
+def _make_trafiklab_request(origin, mode, direction):   # TODO: Handle direction argument
     assert origin in SITE_IDS
     trafiklab = Trafiklab(siteid=SITE_IDS[origin])
     departure = trafiklab.get_trams()[0]
