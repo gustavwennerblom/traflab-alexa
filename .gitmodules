@@ -1,0 +1,3 @@
+[submodule "g-logger"]
+	path = g-logger
+	url = https://github.com/gustavwennerblom/g-logger
