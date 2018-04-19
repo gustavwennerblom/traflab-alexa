@@ -39,6 +39,8 @@ class Trafiklab(object):
         self.API_KEY = trafiklab_key.key
         if not siteid:
             self.home_station = self.SITE_ID_SICKLAKAJ
+        else:
+            self.home_station = siteid
         self.endpoint = self.BASE_URL.format(schema=schema,
                                              key=self.API_KEY,
                                              siteid=self.home_station,
