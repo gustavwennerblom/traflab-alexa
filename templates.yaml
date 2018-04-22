@@ -1,7 +1,11 @@
-welcome: Hi. Let me know your desired direction and mode of transport.
+welcome: Hi. Let me know your desired direction and mode of transport. I have {{departure_site}} as your starting point.
 
-departure_info: Next {{mode}} leaves in {{display_time}} with destination {{destination}}.
+departure_info: The {{mode}} {{line_number}} leaves in {{display_time}} with destination {{destination}}.
 
 list_origins: Currently I know the departures for {{origins}}
 
 not_yet_implemented: Sorry, this is not yet implemented.
+
+dev_confirmation: Executed {func}
+
+sl_error: Unfortunately, I'm not able to get a response from traffic control at the moment.
