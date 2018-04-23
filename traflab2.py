@@ -21,16 +21,18 @@ class Trafiklab(object):
     def get_trams(self):
         # Returns a namedtuple of tram destinations and departure times (values, as displayed on boards)
         response = requests.get(self.endpoint).json()
+        self.log.info(response)     # TODO: Fix log message output
         trams = []
-        Departure = namedtuple('Departure', ['destination', 'display_time'])    # TODO: Replicate for buses w line no
+        Departure = namedtuple('Departure', ['destination', 'display_time', 'line_number'])    # TODO: Replicate for buses w line no
         for dept in response["ResponseData"]["Trams"]:
-            self.log("Got {}".format(dept))
-            trams.append(Departure(dept["Destination"], dept["DisplayTime"]))
+            self.log.info("Got {}".format(dept))
+            trams.append(Departure(dept["Destination"], dept["DisplayTime"], dept['LineNumber']))
         return trams
 
-    def get_buses(self):
+    def get_buses(self, **kwargs):
         # Returns a namedtuple of bus destinations and departure times (values, as displayed on boards)
         response = requests.get(self.endpoint).json()
+        self.log.info(response)     # TODO: Fix log message output
         buses = []
         Departure = namedtuple('Departure', ['destination', 'display_time', 'line_number'])
         for dept in response["ResponseData"]["Buses"]:

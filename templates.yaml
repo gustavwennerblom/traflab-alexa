@@ -1,6 +1,6 @@
 welcome: Hi. Let me know your desired direction and mode of transport. I have {{departure_site}} as your starting point.
 
-departure_info: The {{mode}} {{line_number}} leaves in {{display_time}} with destination {{destination}}.
+departure_info: The {{mode}} {{line_number}} leaves {{display_time}} with destination {{destination}}.
 
 list_origins: Currently I know the departures for {{origins}}
 

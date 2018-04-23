@@ -3,8 +3,9 @@ from flask import Flask, render_template
 from traflab2 import Trafiklab
 from glogger.gLogger import GLogger
 import json
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 from DBHelper import DBHelper
+from pprint import pprint
 
 log = GLogger(name='traflab-alexa-main').get_logger()
 
@@ -16,12 +17,13 @@ log.info("Log enabled")
 
 
 # Build a dict of site id's to use when querying the main Trafiklab API
-SITE_IDS = defaultdict(set)
+SITE_IDS = defaultdict(list)
 with open('sl_Site_20180422-2113.json') as f:
     full_map = json.load(f)
     for site in full_map['ResponseData']['Result']:
-        SITE_IDS[site['SiteName'].lower()].add(site['SiteId'])
-        # SITE_IDS[site['StopPointName']].add((site['StopAreaNumber'],site['StopAreaTypeCode']))
+        if not site['SiteName'].lower() in SITE_IDS:
+            SITE_IDS[site['SiteName'].lower()].append(site['SiteId'])
+            # SITE_IDS[site['StopPointName']].add((site['StopAreaNumber'],site['StopAreaTypeCode']))
     log.info('Built reference of SITE_IDs ({} entries)'.format(len(SITE_IDS)))
 
 
@@ -36,12 +38,47 @@ def launch_skill():
 @ask.intent('OneShotDepartureIntent')
 def one_shot_departure(direction, mode):
     log.info("OneShotDepartureIntent got direction={}, mode={}".format(direction, mode))
-    return _make_trafiklab_request(origin=db.get_default_site(session.user.userId), direction=direction, mode=mode)
+    departures = _make_trafiklab_request(origin=db.get_default_site(session.user.userId), direction=direction, mode=mode)
+    departures_first = []
+    departures_next = []
+
+    for departure in departures:
+        if departure.destination not in [departure.destination for departure in departures_first]:
+            departures_first.append(departure)
+        else:
+            departures_next.append(departure)
+
+    # store next set of departures in session variables
+    session.attributes['mode'] = mode
+    session.attributes['next_departures'] = departures_next
+
+    first_departures_statement = render_departure_response(mode, departures_first, follow_up=True)
+    log.info('Returning {}'.format(first_departures_statement))
+    print("Session['next_departures']: " + str(session.attributes.get('next_departures')))
+    return question(first_departures_statement)
 
 
 @ask.intent('DialogDepartureIntent')
 def dialog_departure():
     return render_template('not_yet_implemented')   # TODO: Implement dialogue intent resolver
+
+
+@ask.intent('AMAZON.YesIntent')
+def more_departures_intent():
+    next_departures = session.attributes.get('next_departures')
+    print('next_departures: ' + str(next_departures))
+    if next_departures:
+        mode = session.attributes.get('mode')
+        Departure = namedtuple('Departure', ['destination', 'display_time', 'line_number'])     #TODO: Check if attrs have a better solution
+        next_departures_nt = [Departure(*attributes) for attributes in next_departures]
+        return statement(render_departure_response(mode, next_departures_nt, follow_up=False))
+    else:
+        return statement("I have no further departures to report")
+
+
+@ask.intent('NoIntent')
+def finish_off():
+    return statement("OK, have a nice trip!")
 
 
 @ask.intent('SupportedOriginsIntent')
@@ -50,6 +87,7 @@ def supported_origins():
     origins = ', '.join(SITE_IDS.keys())
     list_origins_utterance = render_template('list_origins', origins=origins)
     return question(list_origins_utterance)
+
 
 @ask.intent('MyAddressIntent')
 def check_my_address():
@@ -61,9 +99,23 @@ def check_my_address():
 # TODO: Fix a function for setting a default origin
 
 
+def render_departure_response(mode, departures, follow_up):
+    first_departures_text = [render_template('departure_info',
+                                             mode=mode,
+                                             line_number=departure.line_number,
+                                             display_time=departure.display_time,
+                                             destination=departure.destination)
+                             for departure in departures]
+    statement_utterance = '...'.join(first_departures_text)
+
+    if follow_up:
+        statement_utterance += "... do you want to hear later departures"
+    return statement_utterance
+
+
 def _make_trafiklab_request(origin, mode, direction):   # TODO: Handle direction argument
     assert origin in SITE_IDS
-    trafiklab = Trafiklab(siteid=SITE_IDS[origin].pop())        # TODO: Handle multiple sites
+    trafiklab = Trafiklab(siteid=SITE_IDS[origin][0])        # TODO: Handle multiple sites
     if mode == 'tram':
         departures = trafiklab.get_trams()
     elif mode == 'bus':
@@ -74,26 +126,7 @@ def _make_trafiklab_request(origin, mode, direction):   # TODO: Handle direction
     if not departures:   # get_x method has returned empty list
         return statement(render_template('sl_error'))
 
-    departure = departures[0]
-
-    """
-    log.info("Returning departure_info with mode={}, display_time={}, destination={}"
-             .format(mode, departure.display_time, departure.destination))
-    statement_utterance = render_template('departure_info',
-                                          mode=mode,
-                                          display_time=departure.display_time,
-                                          destination=departure.destination)
-    """
-    # TODO: Handle full list of departures (Below is untested)
-    all_departures_text = [render_template('departure_info',
-                                           mode=mode,
-                                           line_number=departure.line_number,
-                                           display_time=departure.display_time,
-                                           destination=departure.destination)
-                           for departure in departures]
-    
-    statement_utterance= '...'.join(all_departures_text)
-    return statement(statement_utterance)
+    return departures
 
 
 def get_device_address():   # TODO: Test with a real device
