@@ -1,11 +1,13 @@
-welcome: Hi. Let me know your desired direction and mode of transport. I have {{departure_site}} as your starting point.
+welcome: '<speak>Hi. Let me know your desired direction and mode of transport.
+         I have <lang xml:lang="sv-SE">{{departure_site}}</lang> as your starting point.</speak>'
 
-departure_info: The {{mode}} {{line_number}} leaves {{display_time}} with destination {{destination}}.
+departure_info: '{{mode}} {{line_number}} toward <lang xml:lang="sv-SE">{{destination}}</lang>
+                leaves {{display_time | standardize_time}}.'
 
-list_origins: Currently I know the departures for {{origins}}
+list_origins: '<speak>Currently I know the departures for <lang xml:lang="sv-SE">{{origins}}</lang></speak>'
 
-not_yet_implemented: Sorry, this is not yet implemented.
+not_yet_implemented: <speak>Sorry, this is not yet implemented.</speak>
 
-dev_confirmation: Executed {func}
+dev_confirmation: Executed {{func}}
 
-sl_error: Unfortunately, I'm not able to get a response from traffic control at the moment.
+sl_error: <speak>Unfortunately, I'm not able to find you any {{mode}} in the next 30 minutes.</speak>

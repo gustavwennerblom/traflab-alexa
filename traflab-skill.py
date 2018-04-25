@@ -32,6 +32,7 @@ def launch_skill():
     user_id = session.user.userId
     log.info("Skill launched for userId {}".format(user_id))
     departure_site = db.get_default_site(user_id)
+    response = render_template('welcome', departure_site=departure_site)
     return question(render_template('welcome', departure_site=departure_site))
 
 
@@ -39,6 +40,10 @@ def launch_skill():
 def one_shot_departure(direction, mode):
     log.info("OneShotDepartureIntent got direction={}, mode={}".format(direction, mode))
     departures = _make_trafiklab_request(origin=db.get_default_site(session.user.userId), direction=direction, mode=mode)
+
+    if not departures:   # empty list returned
+        return statement(render_template('sl_error', mode=mode))
+
     departures_first = []
     departures_next = []
 
@@ -97,17 +102,25 @@ def check_my_address():
     return statement(render_template('dev_confirmation', func='check_my_address'))
 
 
-def render_departure_response(mode, departures, follow_up):
+def render_departure_response(mode, departures, follow_up, ssml=True):
+    if ssml:
+        pause_marker = '<break time="2s"/>'
+    else:
+        pause_marker = '...'
+
     first_departures_text = [render_template('departure_info',
                                              mode=mode,
                                              line_number=departure.line_number,
                                              display_time=departure.display_time,
                                              destination=departure.destination)
                              for departure in departures]
-    statement_utterance = '...'.join(first_departures_text)
+    statement_utterance = pause_marker.join(first_departures_text)
 
     if follow_up:
         statement_utterance += "... do you want to hear later departures"
+
+    statement_utterance = '{0}{1}{2}'.format('<speak>', statement_utterance, '</speak>')
+
     return statement_utterance
 
 
@@ -120,9 +133,6 @@ def _make_trafiklab_request(origin, mode, direction):   # TODO: Handle direction
         departures = trafiklab.get_buses()
     else:
         raise ValueError('Got unsupported mode: "{}"'.format(mode))
-
-    if not departures:   # get_x method has returned empty list
-        return statement(render_template('sl_error'))
 
     return departures
 
@@ -143,6 +153,21 @@ def get_device_address():   # TODO: Test with a real device, or Fix a function f
     result = requests.get(address_endpoint.format(deviceId=device_id), headers=headers)
     address_json = result.json()
     return address_json
+
+@app.template_filter()
+def standardize_time(time):
+    assert isinstance(time, str)
+    if ' ' in time:
+        number, text = time.split(' ')
+        if number == '1':
+            return "in {} minute".format(number)
+        else:
+            return "in {} minutes".format(number)
+
+    if 'nu' in time.lower():
+        return "now"
+
+    return "at {}".format(time)
 
 
 if __name__ == '__main__':
