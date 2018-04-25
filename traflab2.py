@@ -81,18 +81,51 @@ class StopPointFetcher(object):     #TODO: Change name to reflect expanded scope
             self.log.info("{1} data written to {0}".format(filename, self.granularity))
         return 200
 
+class StopLookuper(object):
+    def __init__(self):
+        self.log = GLogger(name='StopLookuperLog').get_logger()
+        self.API_KEY = trafiklab_key.key_platsuppslag
+        self.endpoint = 'http://api.sl.se/api2/typeahead.{}?key={}&searchstring={}stationsonly=True&maxresults=10'
+
+    def lookup_stop(self, search_items, fmt='json'):
+        assert isinstance(search_items, list)
+        search_string = ','.join(search_items)
+        response = requests.get(self.endpoint.format(fmt, self.API_KEY, search_string))
+        return response
+
+
+class StopLookuper2(object):
+    def __init__(self):
+        self.log = GLogger(name='StopLookuperLog').get_logger()
+        self.API_KEY = trafiklab_key.key_close_stops
+        self.endpoint = 'http://api.sl.se/api2/nearbystops.{}?key={}&originCoordLat={}&originCoordLong={}&maxresults={}&radius={}'
+
+    def find_stop(self, lat, long, **kwargs):
+        fmt = kwargs.get('fmt') or 'json'
+        max_results = kwargs.get('max_results') or 5
+        radius = kwargs.get('radius') or 1000
+        response = requests.get(self.endpoint.format(fmt, self.API_KEY, lat, long, max_results, radius))
+        return response
+
+
+
+
 # class SiteFetcher(object):
 #     def __init__(self, schema='json'):
 #         self.log = GLogger(name="SiteFetcherLog: " + __name__).get_logger()
 #         self.API_KEY = trafiklab_key
 
 if __name__ == '__main__':
-    trafiklab = Trafiklab()
-    result_trams = trafiklab.get_trams()
+    #trafiklab = Trafiklab()
+    #result_trams = trafiklab.get_trams()
     # result_buses = trafiklab.get_buses()
-    from pprint import pprint
-    pprint(result_trams)
+    #from pprint import pprint
+    #pprint(result_trams)
     # pprint(result_buses)
     # spf = StopPointFetcher(granularity='Site')
     # pprint(spf.get_stop_points())
     # print(spf.download_stop_points())
+    my_coords=(59.303014, 18.105589)
+    sl = StopLookuper2()
+    res = sl.find_stop(lat=my_coords[0], long=my_coords[1])
+    pprint(res.json())
