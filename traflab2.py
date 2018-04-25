@@ -23,7 +23,7 @@ class Trafiklab(object):
         response = requests.get(self.endpoint).json()
         self.log.info(response)     # TODO: Fix log message output
         trams = []
-        Departure = namedtuple('Departure', ['destination', 'display_time', 'line_number'])    # TODO: Replicate for buses w line no
+        Departure = namedtuple('Departure', ['destination', 'display_time', 'line_number'])
         for dept in response["ResponseData"]["Trams"]:
             self.log.info("Got {}".format(dept))
             trams.append(Departure(dept["Destination"], dept["DisplayTime"], dept['LineNumber']))
@@ -55,6 +55,7 @@ class Trafiklab(object):
                                              siteid=self.home_station,
                                              timewindow=timewindow)
         self.log.info("Trafiklab main object initiated")
+
 
 class StopPointFetcher(object):     #TODO: Change name to reflect expanded scope
     """

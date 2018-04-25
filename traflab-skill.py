@@ -96,8 +96,6 @@ def check_my_address():
         log.info('Key: {}, Value: {}'.format(key, value))
     return statement(render_template('dev_confirmation', func='check_my_address'))
 
-# TODO: Fix a function for setting a default origin
-
 
 def render_departure_response(mode, departures, follow_up):
     first_departures_text = [render_template('departure_info',
@@ -129,7 +127,7 @@ def _make_trafiklab_request(origin, mode, direction):   # TODO: Handle direction
     return departures
 
 
-def get_device_address():   # TODO: Test with a real device
+def get_device_address():   # TODO: Test with a real device, or Fix a function for setting a default origin
     from flask_ask import context
     import requests
     from urllib.parse import urljoin
