@@ -1,4 +1,4 @@
-from flask_ask import Ask, question, statement, session
+from flask_ask import Ask, question, statement, session, delegate
 from flask import Flask, render_template
 from traflab2 import Trafiklab
 from glogger.gLogger import GLogger
@@ -39,6 +39,9 @@ def launch_skill():
 @ask.intent('OneShotDepartureIntent')
 def one_shot_departure(direction, mode):
     log.info("OneShotDepartureIntent got direction={}, mode={}".format(direction, mode))
+    if not dialog_completed():
+        return delegate()
+
     departures = _make_trafiklab_request(origin=db.get_default_site(session.user.userId), direction=direction, mode=mode)
 
     if not departures:   # empty list returned
@@ -81,7 +84,7 @@ def more_departures_intent():
         return statement("I have no further departures to report")
 
 
-@ask.intent('NoIntent')
+@ask.intent('AMAZON.NoIntent')
 def finish_off():
     return statement("OK, have a nice trip!")
 
@@ -93,18 +96,24 @@ def supported_origins():
     list_origins_utterance = render_template('list_origins', origins=origins)
     return question(list_origins_utterance)
 
+#TODO: Implement AMAZON.StopIntent
+
 
 @ask.intent('MyAddressIntent')
 def check_my_address():
     log.info('Stating device address')
+    device_address = get_device_address()
     for key, value in get_device_address().items():
         log.info('Key: {}, Value: {}'.format(key, value))
-    return statement(render_template('dev_confirmation', func='check_my_address'))
+    street = device_address.get('addressLine1')
+    postal_code = device_address.get('postalCode')
+    city = device_address.get('city')
+    return statement(render_template('device_address', street=street, postal_code=postal_code, city=city))
 
 
 def render_departure_response(mode, departures, follow_up, ssml=True):
     if ssml:
-        pause_marker = '<break time="2s"/>'
+        pause_marker = '<break time="1s"/>'
     else:
         pause_marker = '...'
 
@@ -137,7 +146,7 @@ def _make_trafiklab_request(origin, mode, direction):   # TODO: Handle direction
     return departures
 
 
-def get_device_address():   # TODO: Test with a real device, or Fix a function for setting a default origin
+def get_device_address():
     from flask_ask import context
     import requests
     from urllib.parse import urljoin
@@ -154,6 +163,7 @@ def get_device_address():   # TODO: Test with a real device, or Fix a function f
     address_json = result.json()
     return address_json
 
+
 @app.template_filter()
 def standardize_time(time):
     assert isinstance(time, str)
@@ -169,6 +179,9 @@ def standardize_time(time):
 
     return "at {}".format(time)
 
+def dialog_completed():
+    dialog_state = session['dialogState']
+    return dialog_state == 'COMPLETED'
 
 if __name__ == '__main__':
     app.run(debug=True)

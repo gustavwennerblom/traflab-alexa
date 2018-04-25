@@ -6,6 +6,9 @@ departure_info: '{{mode}} {{line_number}} toward <lang xml:lang="sv-SE">{{destin
 
 list_origins: '<speak>Currently I know the departures for <lang xml:lang="sv-SE">{{origins}}</lang></speak>'
 
+device_address: '<speak>My records show that you live at <say-as interpret-as="address">{{street}} in {{city}},
+                postal code {{postal_code}}</say-as>.</speak>'
+
 not_yet_implemented: <speak>Sorry, this is not yet implemented.</speak>
 
 dev_confirmation: Executed {{func}}
