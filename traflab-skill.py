@@ -7,7 +7,7 @@ from collections import defaultdict, namedtuple
 from DBHelper import DBHelper
 from pprint import pprint
 
-log = GLogger(name='traflab-alexa-main').get_logger()
+log = GLogger(handler='timed_rotating_file').get_logger()
 
 app = Flask(__name__)
 ask = Ask(app, '/')
@@ -62,7 +62,6 @@ def one_shot_departure(direction, mode):
 
     first_departures_statement = render_departure_response(mode, departures_first, follow_up=True)
     log.info('Returning {}'.format(first_departures_statement))
-    print("Session['next_departures']: " + str(session.attributes.get('next_departures')))
     return question(first_departures_statement)
 
 
@@ -96,7 +95,17 @@ def supported_origins():
     list_origins_utterance = render_template('list_origins', origins=origins)
     return question(list_origins_utterance)
 
-#TODO: Implement AMAZON.StopIntent
+
+@ask.intent('AMAZON.StopIntent')
+def stop():
+    log.info("Stopping on user request (AMAZON.StopIntent")
+    return statement('Bye')
+
+
+@ask.intent('AMAZON.CancelIntent')
+def cancel():
+    log.info("Cancelling on user request (AMAZON.CancelIntent")
+    return statement('')
 
 
 @ask.intent('MyAddressIntent')
@@ -126,7 +135,7 @@ def render_departure_response(mode, departures, follow_up, ssml=True):
     statement_utterance = pause_marker.join(first_departures_text)
 
     if follow_up:
-        statement_utterance += "... do you want to hear later departures"
+        statement_utterance += "{} do you want to hear later departures".format(pause_marker)
 
     statement_utterance = '{0}{1}{2}'.format('<speak>', statement_utterance, '</speak>')
 
@@ -184,4 +193,4 @@ def dialog_completed():
     return dialog_state == 'COMPLETED'
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
