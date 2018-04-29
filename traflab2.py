@@ -5,12 +5,12 @@ from pprint import pprint
 from datetime import datetime
 from glogger.gLogger import GLogger
 import json
+import logging
 
 
 class Trafiklab(object):
     SITE_ID_SICKLAKAJ="1550"
     BASE_URL = "http://api.sl.se/api2/realtimedeparturesV4.{schema}?key={key}&siteid={siteid}&timewindow={timewindow}"
-    # TODO: Fix logging
 
     def get_full_response(self, url):
         # Returns a dict from the JSON provided by the Trafiklab API, given a compliant REST call
@@ -21,7 +21,7 @@ class Trafiklab(object):
     def get_trams(self):
         # Returns a namedtuple of tram destinations and departure times (values, as displayed on boards)
         response = requests.get(self.endpoint).json()
-        self.log.info(response)     # TODO: Fix log message output
+        self.log.info(response)
         trams = []
         Departure = namedtuple('Departure', ['destination', 'display_time', 'line_number'])
         for dept in response["ResponseData"]["Trams"]:
@@ -32,7 +32,7 @@ class Trafiklab(object):
     def get_buses(self, **kwargs):
         # Returns a namedtuple of bus destinations and departure times (values, as displayed on boards)
         response = requests.get(self.endpoint).json()
-        self.log.info(response)     # TODO: Fix log message output
+        # self.log.info(response)
         buses = []
         Departure = namedtuple('Departure', ['destination', 'display_time', 'line_number'])
         for dept in response["ResponseData"]["Buses"]:
@@ -44,7 +44,8 @@ class Trafiklab(object):
         return endpoint
 
     def __init__(self, schema='json', siteid=None, timewindow='30'):
-        self.log = GLogger(name=__name__).get_logger()
+        self.log = GLogger().get_logger()
+        self.log.info("Trafiklab object initiated")
         self.API_KEY = trafiklab_key.key
         if not siteid:
             self.home_station = self.SITE_ID_SICKLAKAJ
@@ -54,7 +55,6 @@ class Trafiklab(object):
                                              key=self.API_KEY,
                                              siteid=self.home_station,
                                              timewindow=timewindow)
-        self.log.info("Trafiklab main object initiated")
 
 
 class StopPointFetcher(object):     #TODO: Change name to reflect expanded scope
