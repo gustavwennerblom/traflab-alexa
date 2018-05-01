@@ -65,11 +65,6 @@ def one_shot_departure(direction, mode):
     return question(first_departures_statement)
 
 
-@ask.intent('DialogDepartureIntent')
-def dialog_departure():
-    return render_template('not_yet_implemented')   # TODO: Implement dialogue intent resolver
-
-
 @ask.intent('AMAZON.YesIntent')
 def more_departures_intent():
     next_departures = session.attributes.get('next_departures')
