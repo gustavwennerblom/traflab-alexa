@@ -9,10 +9,11 @@ from DBHelper import DBHelper
 from pprint import pprint
 
 import logging
-logging.getLogger('flask-ask').setLevel(logging.DEBUG)
+logging.getLogger('flask_ask').setLevel(logging.DEBUG)
 
 
-log = GLogger(handler='stream').get_logger()
+# log = GLogger(handler='stream').get_logger()
+log = logging.getLogger(__name__)
 
 app = Flask(__name__)
 ask = Ask(app, '/')
@@ -34,12 +35,11 @@ with open(os.path.join(os.path.dirname(__file__),'sl_Site_20180422-2113.json')) 
 
 @ask.launch
 def launch_skill():
-    # user_id = session.user.userId
+    user_id = session.user.userId
     log.info("Skill launched for userId {}".format(user_id))
-    # departure_site = db.get_default_site(user_id)
-    # response = render_template('welcome', departure_site='sickla )
-    #return question(render_template('welcome', departure_site='sickla kaj'))
-    return statement("Testing")
+    departure_site = db.get_default_site(user_id)
+    return question(render_template('welcome', departure_site=departure_site))
+    # return statement("Testing")
 
 @ask.intent('OneShotDepartureIntent')
 def one_shot_departure(direction, mode):
