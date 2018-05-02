@@ -9,4 +9,4 @@ class DBHelper(object):
 
     def __init__(self):
         self.log = GLogger(name=__name__).get_logger()
-        self.log.info("Log initiated (DBHelper")
+        self.log.info("Log initiated (DBHelper)")

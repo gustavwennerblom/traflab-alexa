@@ -5,7 +5,7 @@ import os
 
 
 class GLogger(object):
-    script_directory = os.path.dirname(os.path.realpath(__name__))
+    script_directory = os.path.dirname(os.path.realpath(__file__))
     log_directory='logs'
     filename='gLogger.log'
 
