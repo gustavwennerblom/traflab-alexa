@@ -7,7 +7,7 @@ from collections import defaultdict, namedtuple
 from DBHelper import DBHelper
 from pprint import pprint
 
-log = GLogger(handler='timed_rotating_file').get_logger()
+log = GLogger(handler='stream').get_logger()
 
 app = Flask(__name__)
 ask = Ask(app, '/')
